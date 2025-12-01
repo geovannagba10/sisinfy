@@ -10,7 +10,6 @@ urlpatterns = [
     path('reservas/', views.historico_reservas, name='historico_reservas'),
     path('reservas/<int:reserva_id>/cancelar/', views.cancelar_reserva_usuario, name='cancelar_reserva_usuario'),
 
-    # Gestão
     path('gestao/reservas/pendentes/', views.reservas_pendentes, name='reservas_pendentes'),
     path('gestao/reservas/ativas/', views.reservas_ativas, name='reservas_ativas'),
     path('gestao/reservas/<int:reserva_id>/confirmar-retirada/', views.confirmar_retirada, name='confirmar_retirada'),
@@ -18,7 +17,6 @@ urlpatterns = [
     path('gestao/reservas/<int:reserva_id>/confirmar-devolucao/', views.confirmar_devolucao, name='confirmar_devolucao'),
     path('gestao/registrar-retirada-manual/', views.registrar_retirada_manual, name='registrar_retirada_manual'),
 
-    # Diretoria - gerenciamento de usuários
     path('gestao/usuarios/', views.lista_usuarios, name='lista_usuarios'),
     path('gestao/usuarios/<int:usuario_id>/alterar-acesso/', views.alterar_tipo_acesso_usuario, name='alterar_tipo_acesso_usuario'),
     path('gestao/modificar-estoque/', views.modificar_estoque, name='modificar_estoque'),

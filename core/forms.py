@@ -25,17 +25,14 @@ class ReservaForm(forms.ModelForm):
         data_retirada = cleaned_data.get('data_retirada')
         data_devolucao = cleaned_data.get('data_devolucao')
 
-        # Validações básicas:
         if data_retirada and data_devolucao:
             if data_devolucao < data_retirada:
                 raise ValidationError("A data de devolução não pode ser anterior à data de retirada.")
 
-            # limite de 10 dias a partir da retirada
             delta = (data_devolucao - data_retirada).days
             if delta > 10:
                 raise ValidationError("O período máximo de empréstimo é de 10 dias a partir da retirada.")
 
-        # impedir datas no passado
         if data_retirada and data_retirada < date.today():
             raise ValidationError("A data de retirada não pode ser no passado.")
 
@@ -59,7 +56,6 @@ class ReservaRetiradaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         item = kwargs.pop('item')
         super().__init__(*args, **kwargs)
-        # só mostra exemplares disponíveis e em bom estado
         self.fields['exemplar'].queryset = Exemplar.objects.filter(
             item=item,
             situacao=Exemplar.Situacao.DISPONIVEL,
@@ -116,7 +112,6 @@ class PublicSignupForm(UserCreationForm):
         if not email.endswith('@usp.br'):
             raise ValidationError('O e-mail deve ser um endereço @usp.br.')
 
-        # garante que não exista outro usuário com esse e-mail
         if User.objects.filter(email=email).exists():
             raise ValidationError('Já existe uma conta cadastrada com este e-mail.')
 
@@ -149,7 +144,6 @@ class UsuarioUpdateForm(forms.ModelForm):
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        # evita conflito com outros usuários
         qs = User.objects.filter(username=username).exclude(pk=self.instance.pk)
         if qs.exists():
             raise forms.ValidationError('Já existe outro usuário com esse nome de usuário.')
@@ -187,7 +181,6 @@ class RetiradaManualForm(forms.ModelForm):
         data_retirada = cleaned_data.get('data_retirada')
         data_devolucao = cleaned_data.get('data_devolucao')
 
-        # Procura usuário por NUSP ou email
         try:
             usuario = User.objects.get(
                 Q(nusp=usuario_identificador) | Q(email=usuario_identificador)
@@ -196,12 +189,10 @@ class RetiradaManualForm(forms.ModelForm):
         except User.DoesNotExist:
             raise ValidationError('Usuário não encontrado. Verifique o NUSP ou e-mail.')
 
-        # Validações básicas:
         if data_retirada and data_devolucao:
             if data_devolucao < data_retirada:
                 raise ValidationError("A data de devolução não pode ser anterior à data de retirada.")
 
-            # limite de 15 dias
             delta = (data_devolucao - data_retirada).days
             if delta > 15:
                 raise ValidationError("O período máximo de reserva é de 15 dias.")
@@ -229,7 +220,6 @@ class NovoItemForm(forms.ModelForm):
 
     def clean_codigo_tipo(self):
         codigo_tipo = self.cleaned_data.get('codigo_tipo', '').strip().upper()
-        # Verifica se já existe um item com esse código
         qs = Item.objects.filter(codigo_tipo=codigo_tipo)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
@@ -257,7 +247,6 @@ class NovoExemplarForm(forms.ModelForm):
 
     def clean_codigo_exemplar(self):
         codigo_exemplar = self.cleaned_data.get('codigo_exemplar', '').strip().upper()
-        # Verifica se já existe um exemplar com esse código
         qs = Exemplar.objects.filter(codigo_exemplar=codigo_exemplar)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)

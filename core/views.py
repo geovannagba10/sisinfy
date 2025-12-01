@@ -58,7 +58,6 @@ def lista_itens(request):
         .order_by('nome')
     )
 
-    # Tentar associar logos estáticas em static/core/logos/
     try:
         logos_dir = Path(settings.BASE_DIR) / 'static' / 'core' / 'logos'
         available = {f.name for f in logos_dir.iterdir() if f.is_file()} if logos_dir.exists() else set()
@@ -70,7 +69,6 @@ def lista_itens(request):
     itens_list = list(itens)
     for item in itens_list:
         item.logo_filename = None
-        # 1) procurar por arquivo com id: {id}.ext
         for ext in exts:
             candidate = f"{item.id}.{ext}"
             if candidate in available:
@@ -79,7 +77,6 @@ def lista_itens(request):
         if item.logo_filename:
             continue
 
-        # 2) procurar por slug do nome: nome-do-item.ext
         slug = slugify(item.nome or '')
         for ext in exts:
             candidate = f"{slug}.{ext}"
@@ -89,7 +86,6 @@ def lista_itens(request):
         if item.logo_filename:
             continue
 
-        # 3) procurar por qualquer arquivo que comece com a slug
         if slug:
             for fname in available:
                 if fname.startswith(slug):
@@ -116,7 +112,6 @@ def reservar_item(request, item_id):
 
             erros = False
 
-            # retirada não pode ser no passado
             if reserva.data_retirada < hoje:
                 form.add_error(
                     'data_retirada',
@@ -124,7 +119,6 @@ def reservar_item(request, item_id):
                 )
                 erros = True
 
-            # devolução não pode ser antes da retirada
             if reserva.data_devolucao < reserva.data_retirada:
                 form.add_error(
                     'data_devolucao',
@@ -132,7 +126,6 @@ def reservar_item(request, item_id):
                 )
                 erros = True
 
-            # devolução deve estar no máximo 10 dias após a retirada
             if (reserva.data_devolucao - reserva.data_retirada).days > 10:
                 form.add_error(
                     'data_devolucao',
@@ -166,7 +159,6 @@ def historico_reservas(request):
 
 @login_required
 def cancelar_reserva_usuario(request, reserva_id):
-    # Permite que o usuário cancele sua própria reserva quando estiver PENDENTE
     reserva = get_object_or_404(Reserva, pk=reserva_id, usuario=request.user)
 
     if request.method != 'POST':
@@ -177,7 +169,6 @@ def cancelar_reserva_usuario(request, reserva_id):
         messages.warning(request, 'Só é possível cancelar reservas que ainda não foram confirmadas.')
         return redirect('core:historico_reservas')
 
-    # Se houver exemplar vinculado marcado como reservado, libera-o
     exemplar = reserva.exemplar
     if exemplar is not None and exemplar.situacao == Exemplar.Situacao.RESERVADO:
         exemplar.situacao = Exemplar.Situacao.DISPONIVEL
@@ -197,7 +188,6 @@ def logout_view(request):
 @gestao_required
 def reservas_pendentes(request):
 
-    # Permitir busca por q: usuário (nusp/username/nome/email), item (codigo/nome) ou id
     q = request.GET.get('q', '').strip()
     reservas = (Reserva.objects
                 .filter(status=Reserva.Status.PENDENTE)
@@ -214,7 +204,6 @@ def reservas_pendentes(request):
             Q(item__codigo_tipo__icontains=q) |
             Q(item__nome__icontains=q)
         )
-        # permitir busca por id exata quando q é numérico
         if q.isdigit():
             filtros = filtros | Q(id=int(q))
 
@@ -234,7 +223,6 @@ def confirmar_retirada(request, reserva_id):
 
     reserva = get_object_or_404(Reserva, pk=reserva_id)
 
-    # Só faz sentido confirmar retirada se ainda estiver pendente
     if reserva.status != Reserva.Status.PENDENTE:
         return redirect('core:reservas_pendentes')
 
@@ -243,15 +231,12 @@ def confirmar_retirada(request, reserva_id):
         if form.is_valid():
             exemplar = form.cleaned_data['exemplar']
 
-            # Vincula o exemplar à reserva
             reserva.exemplar = exemplar
             reserva.status = Reserva.Status.CONFIRMADO
-            # Registra quem confirmou a retirada e quando
             reserva.usuario_confirmou_retirada = request.user
             reserva.data_confirmou_retirada = timezone.now()
             reserva.save()
 
-            # Atualiza a situação do exemplar
             exemplar.situacao = Exemplar.Situacao.RESERVADO
             exemplar.save()
 
@@ -270,7 +255,6 @@ def confirmar_retirada(request, reserva_id):
 @gestao_required
 def cancelar_reserva(request, reserva_id):
 
-    # Por segurança, só aceitamos POST
     if request.method != 'POST':
         return redirect('core:reservas_pendentes')
 
@@ -278,14 +262,11 @@ def cancelar_reserva(request, reserva_id):
 
     if reserva.status == Reserva.Status.PENDENTE:
 
-        # Se por algum motivo já tiver exemplar vinculado e marcado como reservado,
-        # liberamos o exemplar de volta.
         exemplar = reserva.exemplar
         if exemplar is not None and exemplar.situacao == Exemplar.Situacao.RESERVADO:
             exemplar.situacao = Exemplar.Situacao.DISPONIVEL
             exemplar.save()
 
-        # Usa o método do model que já atualiza campos e cria histórico
         reserva.marcar_como_cancelada(
             motivo="Reserva cancelada pela gestão.",
             automatico=False,
@@ -298,7 +279,6 @@ def cancelar_reserva(request, reserva_id):
 @gestao_required
 def reservas_ativas(request):
 
-    # Permitir busca por q: usuário (nusp/username/nome/email), item (codigo/nome) ou id
     q = request.GET.get('q', '').strip()
     reservas = (Reserva.objects
                 .filter(status=Reserva.Status.CONFIRMADO)
@@ -334,7 +314,6 @@ def confirmar_devolucao(request, reserva_id):
 
     reserva = get_object_or_404(Reserva, pk=reserva_id)
 
-    # Só faz sentido confirmar devolução se estiver com empréstimo ativo
     if reserva.status != Reserva.Status.CONFIRMADO:
         return redirect('core:reservas_ativas')
 
@@ -347,9 +326,6 @@ def confirmar_devolucao(request, reserva_id):
             if exemplar is not None:
                 exemplar.condicao = nova_condicao
 
-                # Regra simples:
-                # - se voltou Bom -> fica Disponível
-                # - se voltou Defeituoso -> vai para Manutenção
                 if nova_condicao == Exemplar.Condicao.BOM:
                     exemplar.situacao = Exemplar.Situacao.DISPONIVEL
                 else:
@@ -358,7 +334,6 @@ def confirmar_devolucao(request, reserva_id):
                 exemplar.save()
 
             reserva.status = Reserva.Status.CONCLUIDA
-            # Registra quem confirmou a devolução e quando
             reserva.usuario_confirmou_devolucao = request.user
             reserva.data_confirmou_devolucao = timezone.now()
             reserva.save()
@@ -418,12 +393,11 @@ def signup(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.tipo_acesso = 'Aluno'
-            user.is_active = False  # usuário começa inativo
+            user.is_active = False
             user.save()
 
             enviar_email_ativacao(user, request)
 
-            # Em vez de logar, mostramos uma página de instrução
             return render(request, 'registration/aguarde_ativacao.html', {
                 'email': user.email,
             })
@@ -447,7 +421,6 @@ def ativar_conta(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        # opcional: fazer login automático
         login(request, user)
         return render(request, 'registration/ativacao_sucesso.html', {'user': user})
     else:
@@ -459,7 +432,6 @@ def ativar_conta(request, uidb64, token):
 @diretoria_required
 def lista_usuarios(request):
 
-    # Busca por query 'q' (NUSP, username, email, primeiro/nome)
     q = request.GET.get('q', '').strip()
     usuarios = User.objects.all()
     if q:
@@ -568,7 +540,6 @@ def historico_reservas_completo(request):
     """
     from django.core.paginator import Paginator
     
-    # Filtros opcionais
     status_filtro = request.GET.get('status', '')
     usuario_filtro = request.GET.get('usuario', '')
     item_filtro = request.GET.get('item', '')
@@ -579,7 +550,6 @@ def historico_reservas_completo(request):
         'usuario_confirmou_devolucao'
     ).order_by('-data_reserva')
     
-    # Aplicar filtros
     if status_filtro:
         reservas = reservas.filter(status=status_filtro)
     if usuario_filtro:
@@ -587,8 +557,7 @@ def historico_reservas_completo(request):
     if item_filtro:
         reservas = reservas.filter(item__codigo_tipo__icontains=item_filtro)
     
-    # Paginação
-    paginator = Paginator(reservas, 20)  # 20 itens por página
+    paginator = Paginator(reservas, 20)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
@@ -612,7 +581,6 @@ def estatisticas_vue(request):
     """
     itens = Item.objects.all().order_by('nome')
 
-    # serializar itens para passar para o Vue
     itens_serializados = [
         {"id": i.id, "nome": i.nome, "codigo_tipo": i.codigo_tipo}
         for i in itens

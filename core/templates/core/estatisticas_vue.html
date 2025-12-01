@@ -98,7 +98,7 @@
   </div>
 </div>
 
-<!-- Vue 3 e Chart.js via CDN -->
+<!-- Vue 3 e Chart.js -->
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -142,7 +142,7 @@
           }
           const ct = resp.headers.get('content-type') || '';
           if (!ct.includes('application/json')) {
-            // resposta não é JSON (provavelmente redirect para login)
+            // resposta não é JSON (provavelmente redirecionamento para login)
             const text = await resp.text();
             console.error('Resposta inesperada (não JSON):', text.slice(0, 500));
             return;

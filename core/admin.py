@@ -5,7 +5,6 @@ from .models import Usuario, Item, Exemplar, Reserva
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
-    # qual campo é usado como username
     model = Usuario
     list_display = ('nusp', 'username', 'email', 'tipo_acesso', 'is_staff', 'is_superuser')
     search_fields = ('nusp', 'username', 'email')

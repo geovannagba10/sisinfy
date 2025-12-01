@@ -30,24 +30,19 @@ class Usuario(AbstractUser):
     )
 
 
-    # Vamos usar o NUSP como "username" para login
     USERNAME_FIELD = 'nusp'
-    REQUIRED_FIELDS = ['username', 'email']  # o que o createsuperuser ainda exige
+    REQUIRED_FIELDS = ['username', 'email']
 
     def __str__(self):
-        # Isso define como o usuário aparece no admin, etc.
         return f'{self.nusp} - {self.get_full_name() or self.username}'
 
 class Item(models.Model):
 
-    # Nome do tipo do item (ex.: "Calculadora Científica", "Jaleco", etc.)
     nome = models.CharField(
         max_length=255,
         verbose_name='Nome do tipo de item'
     )
 
-    # Código do TIPO, não do exemplar físico.
-    # Ex.: "JAL-M", "OC-01", "CALC-CIENT"
     codigo_tipo = models.CharField(
         max_length=20,
         unique=True,
@@ -60,9 +55,8 @@ class Item(models.Model):
         help_text='Detalhes do item (tamanho, uso, observações gerais).'
     )
 
-    # Campo de imagem — adicionamos aqui
     imagem = models.ImageField(
-        upload_to='itens/',    # pasta dentro de MEDIA_ROOT
+        upload_to='itens/',
         blank=True,
         null=True,
         verbose_name='Imagem do item'
@@ -120,10 +114,10 @@ class Exemplar(models.Model):
 class Reserva(models.Model):
 
     class Status(models.TextChoices):
-        PENDENTE = 'Pendente', 'Pendente'          # aluno reservou, gestão ainda não confirmou
-        CONFIRMADO = 'Confirmado', 'Confirmado'    # retirada feita / empréstimo ativo
-        CANCELADA = 'Cancelada', 'Cancelada'       # cancelada antes da retirada (manual ou automática)
-        CONCLUIDA = 'Concluida', 'Concluída'       # devolução registrada
+        PENDENTE = 'Pendente', 'Pendente'
+        CONFIRMADO = 'Confirmado', 'Confirmado'
+        CANCELADA = 'Cancelada', 'Cancelada'
+        CONCLUIDA = 'Concluida', 'Concluída'
 
     usuario = models.ForeignKey(
         Usuario,
@@ -152,7 +146,6 @@ class Reserva(models.Model):
         verbose_name='Data da reserva'
     )
 
-    # continua sendo só a DATA escolhida para buscar
     data_retirada = models.DateField(
         verbose_name='Data prevista para retirada'
     )
@@ -174,7 +167,6 @@ class Reserva(models.Model):
         help_text='Comentários sobre esta reserva (motivo, situação específica etc.).'
     )
 
-    # === NOVOS CAMPOS PARA CONTROLAR CANCELAMENTO ===
     cancelada_em = models.DateTimeField(
         null=True,
         blank=True,
@@ -192,7 +184,6 @@ class Reserva(models.Model):
         default=False,
         verbose_name='Cancelamento automático'
     )
-    # ================================================
 
     usuario_cancelou = models.ForeignKey(
         Usuario,
@@ -203,7 +194,6 @@ class Reserva(models.Model):
         verbose_name='Quem cancelou'
     )
 
-    # === CAMPOS PARA RASTREAR CONFIRMAÇÕES ===
     usuario_confirmou_retirada = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
@@ -233,18 +223,15 @@ class Reserva(models.Model):
         blank=True,
         verbose_name='Data/hora que confirmou a devolução'
     )
-    # ================================================
 
     def __str__(self):
         return f'Reserva #{self.id} - {self.usuario.nusp} - {self.item.codigo_tipo} ({self.status})'
 
-    # helper pra não repetir lógica na view / job
     def marcar_como_cancelada(self, motivo: str = '', automatico: bool = False, usuario=None):
         """
         Marca a reserva como cancelada, atualizando campos relacionados e salvando no banco.
         Vai ser usada tanto no cancelamento manual quanto no automático.
         """
-        # se já não estiver pendente/confirmada, não faz nada
         if self.status == self.Status.CANCELADA or self.status == self.Status.CONCLUIDA:
             return
 
@@ -252,16 +239,13 @@ class Reserva(models.Model):
         self.cancelada_em = timezone.now()
         self.motivo_cancelamento = motivo or self.motivo_cancelamento
         self.cancelamento_automatico = automatico
-        # registrar quem realizou o cancelamento quando fornecido
         if usuario is not None:
             try:
                 self.usuario_cancelou = usuario
             except Exception:
-                # se algo inesperado ocorrer, não bloquear o cancelamento
                 pass
         self.save()
         
-# Deixar comentado ou remover ReservaHistorico se não precisar mais
 class ReservaHistorico(models.Model):
     """
     DESCONTINUADO: Os dados foram consolidados no modelo Reserva.

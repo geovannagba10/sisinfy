@@ -11,11 +11,9 @@ def gestao_required(view_func):
         if not request.user.is_authenticated:
             return HttpResponseForbidden('Você não está autenticado.')
 
-        # Se o tipo_acesso for 'Aluno', bloqueia:
         if request.user.tipo_acesso == 'Aluno':
             return HttpResponseForbidden('Você não tem permissão para acessar esta página.')
 
-        # Gestão / Diretoria passam
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view

@@ -25,7 +25,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Autenticação
     path(
         'accounts/login/',
         auth_views.LoginView.as_view(template_name='registration/login.html'),
@@ -34,10 +33,8 @@ urlpatterns = [
 
     path('accounts/logout/', logout_view, name='logout'),
 
-    # Cadastro público (cria usuário como Aluno)
     path('accounts/signup/', signup, name='signup'),
 
-    # App principal
     path('', include('core.urls', namespace='core')),
 ]
 
