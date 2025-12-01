@@ -5,3 +5,9 @@ setuptools==80.9.0
 sqlparse==0.5.3
 tzdata==2025.2
 wheel==0.45.1
+
+# Produção
+gunicorn==23.0.0
+psycopg2-binary==2.9.10
+whitenoise==6.8.2
+dj-database-url==2.2.0
