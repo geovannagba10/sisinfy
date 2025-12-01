@@ -5,6 +5,7 @@ setuptools==80.9.0
 sqlparse==0.5.3
 tzdata==2025.2
 wheel==0.45.1
+Pillow==11.0.0
 
 # Produção
 gunicorn==23.0.0
