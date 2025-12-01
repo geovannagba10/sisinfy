@@ -1,0 +1,1453 @@
+/*  VARIÁVEIS DE TEMA */
+:root {
+  --cor-fundo: #8b0000;          /* vermelho de fundo */
+  --cor-card: #ffffff;           /* fundo do card principal */
+  --cor-texto: #111111;
+  --cor-menu-bg: #ffffff;        /* fundo da barra lateral */
+  --cor-menu-ativo: #b22222;     /* item selecionado */
+  --cor-menu-ativo-texto: #ffffff;
+  --cor-menu-link: #111111;
+  --cor-botao: #b22222;
+  --cor-botao-texto: #ffffff;
+  --raio-card: 40px;
+  --fonte: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* LAYOUT GLOBAL */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--fonte);
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+}
+
+/* Contêiner geral: sidebar + conteúdo */
+.layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Barra Lateral */
+.sidebar {
+  width: 260px;
+  background: var(--cor-menu-bg);
+  margin: 20px 0 20px 20px;
+  border-radius: 0 var(--raio-card) var(--raio-card) 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: width 0.25s ease, padding 0.25s ease, margin 0.25s ease;
+}
+
+/* “Hamburger” no topo da sidebar */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.hamburger {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #000;
+  position: relative;
+  transform-origin: center;
+  transition: background 0.2s ease, transform 0.22s ease;
+}
+
+.hamburger span::before,
+.hamburger span::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  background: #000;
+  left: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  transform-origin: center;
+}
+
+.hamburger span::before {
+  transform: translateY(-6px);
+}
+
+.hamburger span::after {
+  transform: translateY(6px);
+}
+
+/* Hamburger open (X) animation: hide middle bar and rotate pseudo-elements into an X */
+.hamburger.open span {
+  background: transparent;
+}
+
+.hamburger.open span::before {
+  transform: translateY(0) rotate(45deg);
+}
+
+.hamburger.open span::after {
+  transform: translateY(0) rotate(-45deg);
+}
+
+/* Default contracted state: small circular button is black, lines white */
+@media (min-width: 901px) {
+  .layout.sidebar-contracted .sidebar .hamburger {
+    background: #000;
+    border-color: rgba(0,0,0,0.0);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  }
+  .layout.sidebar-contracted .sidebar .hamburger span,
+  .layout.sidebar-contracted .sidebar .hamburger span::before,
+  .layout.sidebar-contracted .sidebar .hamburger span::after {
+    background: #fff;
+  }
+}
+
+/* When expanded (not contracted): white circle / black lines; X is black */
+.layout:not(.sidebar-contracted) .sidebar .hamburger {
+  background: #fff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: none;
+}
+.layout:not(.sidebar-contracted) .sidebar .hamburger span,
+.layout:not(.sidebar-contracted) .sidebar .hamburger span::before,
+.layout:not(.sidebar-contracted) .sidebar .hamburger span::after {
+  background: #000;
+}
+.layout:not(.sidebar-contracted) .sidebar .hamburger.open span::before,
+.layout:not(.sidebar-contracted) .sidebar .hamburger.open span::after {
+  background: #000;
+}
+
+/* Floating toggle: default black button with white bars; when open -> white with black X */
+.hamburger-toggle {
+  background: #000;
+  border-color: rgba(0,0,0,0.0);
+}
+.hamburger-toggle span,
+.hamburger-toggle span::before,
+.hamburger-toggle span::after {
+  background: #fff;
+}
+.hamburger-toggle.open {
+  background: #fff;
+  border-color: rgba(0,0,0,0.08);
+}
+.hamburger-toggle.open span,
+.hamburger-toggle.open span::before,
+.hamburger-toggle.open span::after {
+  background: #000;
+}
+
+/* smoother transitions for expansion */
+.sidebar {
+  transition: width 0.32s cubic-bezier(.2,.9,.3,1), padding 0.28s ease, margin 0.28s ease, background 0.28s ease;
+}
+.hamburger,
+.hamburger-toggle {
+  transition: background 0.28s cubic-bezier(.2,.9,.3,1), box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+/* Botão de menu flutuante (para telas pequenas) */
+.hamburger-toggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  background: #fff;
+  display: none; /* só mostraremos em telas pequenas */
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  cursor: pointer;
+}
+
+.hamburger-toggle span,
+.hamburger-toggle span::before,
+.hamburger-toggle span::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #000;
+  position: relative;
+}
+
+.hamburger-toggle span::before,
+.hamburger-toggle span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.hamburger-toggle span::before {
+  top: -6px;
+}
+
+.hamburger-toggle span::after {
+  top: 6px;
+}
+
+/* animate floating hamburger toggle similarly to internal hamburger */
+.hamburger-toggle span {
+  transition: background 0.2s ease;
+}
+.hamburger-toggle span::before,
+.hamburger-toggle span::after {
+  transition: transform 0.22s ease, top 0.22s ease, opacity 0.22s ease;
+}
+.hamburger-toggle.open span {
+  background: transparent;
+}
+.hamburger-toggle.open span::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+.hamburger-toggle.open span::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+/* Overlay por trás da sidebar em telas pequenas */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  display: none;
+  /* put overlay between main and sidebar */
+  z-index: 1050;
+}
+
+.sidebar-overlay.overlay-visivel {
+  display: block;
+}
+
+
+/* Menu lateral */
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav li {
+  margin-bottom: 8px;
+}
+
+.menu-link {
+  display: block;
+  padding: 10px 14px;
+  text-decoration: none;
+  color: var(--cor-menu-link);
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.menu-link:hover {
+  text-decoration: underline;
+}
+
+.menu-link.ativo {
+  background: var(--cor-menu-ativo);
+  color: var(--cor-menu-ativo-texto);
+  text-decoration: none;
+}
+
+/*  ÁREA PRINCIPAL */
+.main {
+  flex: 1;
+  margin: 20px 20px 20px 10px;
+  background: var(--cor-card);
+  border-radius: var(--raio-card);
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  transition: margin 0.25s ease, padding 0.25s ease;
+}
+
+/* Estado contraído da sidebar (desktop) */
+@media (min-width: 901px) {
+  .layout.sidebar-contracted .sidebar {
+    width: 56px;
+    padding: 8px;
+  }
+
+  .layout.sidebar-contracted .sidebar .sidebar-header .hamburger {
+    border-color: transparent;
+  }
+
+  /* Esconde o texto dos links quando a sidebar está contraída, mantendo acesso via tooltip */
+  /* When contracted we hide the full nav and show only the hamburger circle */
+  .layout.sidebar-contracted .sidebar-nav,
+  .layout.sidebar-contracted .sidebar .sidebar-header + .sidebar-nav,
+  .layout.sidebar-contracted .sidebar hr {
+    display: none;
+  }
+
+  .layout.sidebar-contracted .sidebar {
+    /* Make the sidebar behave like a small floating button instead of a full column */
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+    z-index: 1200;
+  }
+}
+
+@media (min-width: 901px) {
+  .layout.sidebar-contracted .sidebar .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    width: 56px;
+  }
+
+  /* style the small floating hamburger circle so it's visible against any background */
+  .layout.sidebar-contracted .sidebar .hamburger {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    border: 2px solid rgba(0,0,0,0.08);
+  }
+
+  /* ensure nav is hidden (no white column) */
+  .layout.sidebar-contracted .sidebar-nav,
+  .layout.sidebar-contracted .sidebar hr {
+    display: none;
+  }
+
+  /* quando contraída, reduz o padding da main para aproveitar espaço */
+  .layout.sidebar-contracted .main {
+    margin-left: 10px;
+    padding: 24px 28px;
+  }
+}
+
+/* Título da página */
+.page-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.page-title-underline {
+  width: 50%;
+  max-width: 400px;
+  height: 3px;
+  background: #000;
+  margin: 4px auto 24px auto;
+}
+
+/* Conteúdo interno */
+.page-content {
+  flex: 1;
+}
+
+/*  CARDS DE ITENS  */
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  justify-items: center;
+}
+
+.item-card {
+  text-align: center;
+  padding: 16px;
+}
+
+/* ícones/imagens de itens  */
+.item-icon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 12px auto;
+  border: 2px solid #000;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+}
+
+/* quando houver uma imagem de logo dentro do .item-icon */
+.item-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 6px;
+}
+
+/* Nome do item */
+.item-nome {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* Quantidades */
+.item-info {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* BOTÕES */
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background: var(--cor-botao);
+  color: var(--cor-botao-texto);
+}
+
+.btn-primary:disabled,
+.btn-primary[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/*  FORMULÁRIOS */
+.form-card {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.form-card h1 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.form-card label {
+  display: block;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.form-card input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+}
+
+.form-card button {
+  margin-top: 16px;
+  width: 100%;
+}
+
+
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: transparent;
+  color: #fff !important;
+  padding: 20px 0;
+  width: 100%;
+  margin-top: 40px;
+  position: relative;
+  z-index: 10;
+}
+
+footer p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: inherit;
+}
+
+@media (max-width: 900px) {
+  footer {
+    padding: 15px 0;
+  }
+}
+
+/* More specific selector to avoid being sobrescrito por outras regras */
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: transparent !important;
+  color: #fff !important;
+  padding: 20px 0 !important;
+  width: 100% !important;
+  margin-top: 40px !important;
+}
+
+.site-footer p {
+  margin: 0;
+  color: inherit;
+}
+
+/* Ajustes para telas menores (mobile) */
+@media (max-width: 900px) {
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-size: 18px;
+  }
+
+  /* Layout em mobile: flex-direction column */
+  .layout {
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Botão flutuante aparece em telas pequenas */
+  .hamburger-toggle {
+    display: flex !important;
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
+  }
+
+  /* Sidebar em mobile: overlay full-screen quando aberta */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    /* place the sidebar above the overlay so its contents remain readable */
+    z-index: 1100;
+    background: var(--cor-menu-bg) !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    /* When sidebar-aberta, show it; otherwise hide off-screen */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--sidebar-transition-duration) var(--sidebar-transition-ease), visibility var(--sidebar-transition-duration) var(--sidebar-transition-ease) !important;
+  }
+
+  .sidebar.sidebar-aberta {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Esconde o hambúrguer decorativo de dentro da sidebar em telas pequenas */
+  .sidebar-header {
+    display: none !important;
+  }
+
+  /* Mostra a nav em mobile */
+  .sidebar-nav {
+    display: block !important;
+    opacity: 1 !important;
+    max-height: none !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding: 70px 28px 28px 28px !important;
+  }
+
+  /* Conteúdo principal em mobile */
+  .main {
+    flex: 1;
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 28px 20px !important;
+    border-radius: 0;
+    background: var(--cor-card) !important;
+    transition: opacity var(--sidebar-transition-duration) var(--sidebar-transition-ease), visibility var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Quando sidebar abre (sidebar-aberta ativo), main desaparece */
+  .layout.sidebar-aberta .main {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .layout.sidebar-contracted .main {
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 28px 20px !important;
+    transform: none !important;
+  }
+
+  .layout:not(.sidebar-contracted) .main {
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 28px 20px !important;
+    transform: none !important;
+  }
+
+  /* Itens do menu em mobile */
+  .sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-nav li {
+    margin-bottom: 16px;
+  }
+
+  .menu-link {
+    display: block;
+    padding: 16px 18px;
+    font-size: 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .menu-link:hover {
+    background: rgba(0,0,0,0.05);
+  }
+
+  /* Page title em mobile */
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .page-title-underline {
+    height: 4px;
+    margin: 8px auto 20px auto;
+  }
+
+  /* Cards em mobile */
+  .item-grid {
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .item-card {
+    padding: 12px;
+  }
+
+  .item-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 36px;
+  }
+
+  .item-nome {
+    font-size: 16px;
+  }
+
+  .item-info {
+    font-size: 14px;
+  }
+
+  /* Botões em mobile */
+  .btn {
+    padding: 14px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+}
+
+
+
+/* === Overrides: harmonize sidebar/main transitions and hamburger colors === */
+:root {
+  --sidebar-width: 260px;
+  --sidebar-contracted-width: 56px;
+  --sidebar-transition-duration: 0.34s;
+  --sidebar-transition-ease: cubic-bezier(.2,.9,.3,1);
+}
+
+/* Sidebar sizing & transition (override earlier declarations) */
+.sidebar {
+  width: var(--sidebar-width) !important;
+  transition: width var(--sidebar-transition-duration) var(--sidebar-transition-ease), padding calc(var(--sidebar-transition-duration) - 0.06s) ease, margin calc(var(--sidebar-transition-duration) - 0.06s) ease, background 0.28s ease;
+}
+
+@media (min-width: 901px) {
+  .layout.sidebar-contracted .sidebar {
+    width: var(--sidebar-contracted-width) !important;
+    padding: 8px !important;
+  }
+
+  /* Contracted: hamburger circle should be black with white bars */
+  .layout.sidebar-contracted .sidebar .hamburger {
+    width: var(--sidebar-contracted-width) !important;
+    height: var(--sidebar-contracted-width) !important;
+    background: #000 !important;
+    border-color: rgba(255,255,255,0.06) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
+  }
+  .layout.sidebar-contracted .sidebar .hamburger span,
+  .layout.sidebar-contracted .sidebar .hamburger span::before,
+  .layout.sidebar-contracted .sidebar .hamburger span::after {
+    background: #fff !important;
+  }
+}
+
+/* Expanded: hamburger circle white, bars black */
+.layout:not(.sidebar-contracted) .sidebar .hamburger {
+  background: #fff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+.layout:not(.sidebar-contracted) .sidebar .hamburger span,
+.layout:not(.sidebar-contracted) .sidebar .hamburger span::before,
+.layout:not(.sidebar-contracted) .sidebar .hamburger span::after {
+  background: #000 !important;
+}
+
+/* Floating toggle: default black with white bars; open -> white with black X */
+.hamburger-toggle {
+  background: #000 !important;
+  border-color: rgba(0,0,0,0.0) !important;
+}
+.hamburger-toggle span,
+.hamburger-toggle span::before,
+.hamburger-toggle span::after {
+  background: #fff !important;
+}
+.hamburger-toggle.open {
+  background: #fff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+.hamburger-toggle.open span,
+.hamburger-toggle.open span::before,
+.hamburger-toggle.open span::after {
+  background: #000 !important;
+}
+
+/* Harmonize main content animation: when sidebar expands/contracts, main width adjusts proportionally */
+.main {
+  transition: width var(--sidebar-transition-duration) var(--sidebar-transition-ease), margin var(--sidebar-transition-duration) var(--sidebar-transition-ease), padding var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+  width: auto;
+  max-width: 100%;
+}
+@media (min-width: 901px) {
+  .layout.sidebar-contracted .main {
+    width: calc(100% - 56px - 30px);
+    margin-left: 10px;
+    padding: 24px 28px;
+  }
+}
+.layout:not(.sidebar-contracted) .main {
+  width: calc(100% - 260px - 30px);
+  margin-left: 10px;
+  padding: 32px 40px;
+}
+
+/* Harmonize hamburger transitions */
+.hamburger,
+.hamburger-toggle {
+  transition: background var(--sidebar-transition-duration) var(--sidebar-transition-ease), box-shadow var(--sidebar-transition-duration) ease, border-color var(--sidebar-transition-duration) ease, transform var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+  will-change: background, transform;
+}
+
+/* Smooth hamburger span transitions */
+.hamburger span,
+.hamburger-toggle span {
+  transition: background var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+  opacity: 1;
+}
+
+.hamburger span::before,
+.hamburger span::after,
+.hamburger-toggle span::before,
+.hamburger-toggle span::after {
+  transition: transform var(--sidebar-transition-duration) var(--sidebar-transition-ease), top var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+  transform-origin: center;
+}
+
+/* Global open behavior: hide center bar to avoid residual stroke */
+.hamburger.open span,
+.hamburger-toggle.open span {
+  background: transparent !important;
+}
+
+/* Move the pseudo-elements into the center and rotate to create a clean X */
+.hamburger.open span::before,
+.hamburger-toggle.open span::before {
+  top: 0 !important;
+  transform: rotate(45deg) !important;
+}
+.hamburger.open span::after,
+.hamburger-toggle.open span::after {
+  top: 0 !important;
+  transform: rotate(-45deg) !important;
+}
+
+/* For contracted state ensure colors are correct while open */
+.layout.sidebar-contracted .sidebar .hamburger.open span::before,
+.layout.sidebar-contracted .sidebar .hamburger.open span::after {
+  background: #fff !important;
+}
+.layout:not(.sidebar-contracted) .sidebar .hamburger.open span::before,
+.layout:not(.sidebar-contracted) .sidebar .hamburger.open span::after,
+.hamburger-toggle.open span::before,
+.hamburger-toggle.open span::after {
+  background: #000 !important;
+}
+
+/* Improve smoothness: ensure sidebar and main share the exact same duration/easing and start together */
+.sidebar {
+  transition: width var(--sidebar-transition-duration) var(--sidebar-transition-ease), padding var(--sidebar-transition-duration) var(--sidebar-transition-ease), margin var(--sidebar-transition-duration) var(--sidebar-transition-ease), background var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+}
+.main {
+  transition: transform var(--sidebar-transition-duration) var(--sidebar-transition-ease), margin var(--sidebar-transition-duration) var(--sidebar-transition-ease), padding var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+}
+
+/* Fix: when contracted and opening, ensure the middle bar is hidden (no extra stroke) */
+@media (min-width: 901px) {
+  .layout.sidebar-contracted .sidebar .hamburger.open span {
+    background: transparent !important;
+  }
+  .layout.sidebar-contracted .sidebar .hamburger.open span::before,
+  .layout.sidebar-contracted .sidebar .hamburger.open span::after {
+    background: #fff !important;
+  }
+}
+
+/* Smooth hide/show for sidebar nav: use opacity and max-height instead of display:none
+   This allows the closing transition to animate harmoniously along with sidebar/main */
+.sidebar-nav {
+  transition: opacity var(--sidebar-transition-duration) var(--sidebar-transition-ease), max-height var(--sidebar-transition-duration) var(--sidebar-transition-ease), transform var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+  overflow: hidden;
+  max-height: 2000px; /* default expanded maximum */
+}
+
+@media (min-width: 901px) {
+  .layout.sidebar-contracted .sidebar-nav,
+  .layout.sidebar-contracted .sidebar .sidebar-header + .sidebar-nav,
+  .layout.sidebar-contracted .sidebar hr {
+    /* keep elements in the flow but hidden visually for smooth transitions */
+    display: block !important;
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+  }
+}
+
+.layout:not(.sidebar-contracted) .sidebar-nav,
+.layout:not(.sidebar-contracted) .sidebar hr {
+  opacity: 1;
+  max-height: 2000px;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Also smooth the overlay appearance */
+.sidebar-overlay {
+  transition: opacity var(--sidebar-transition-duration) var(--sidebar-transition-ease);
+  opacity: 0;
+}
+.sidebar-overlay.overlay-visivel {
+  display: block;
+  opacity: 1;
+}
+
+/* ========================================================= */
+/*            PÁGINA "MINHAS RESERVAS / HISTÓRICO"           */
+/* ========================================================= */
+
+.reservas-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 16px;
+}
+
+.reservas-card {
+  background: var(--cor-card);
+  border-radius: 32px;
+  padding: 24px 36px;
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 0 0 0 2px #000; /* contorno preto, estilo mockup */
+}
+
+/* título central dentro do card */
+.reservas-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+/* barrinha preta embaixo do título */
+.reservas-title::after {
+  content: "";
+  display: block;
+  width: 120px;
+  height: 3px;
+  background: #000;
+  margin: 8px auto 0 auto;
+}
+
+/* subtítulo explicativo */
+.reservas-subtitle {
+  text-align: center;
+  margin-top: 12px;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+
+/* wrapper da tabela */
+.reservas-table-wrapper {
+  overflow-x: auto;
+}
+
+/* tabela em si */
+.reservas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.reservas-table th,
+.reservas-table td {
+  border: 1px solid #000;
+  padding: 8px 12px;
+}
+
+.reservas-table th {
+  font-weight: 700;
+}
+
+/* versão responsiva do card de reservas */
+@media (max-width: 900px) {
+  .reservas-wrapper {
+    padding-top: 8px;
+  }
+
+  .reservas-card {
+    border-radius: 20px;
+    padding: 20px 16px;
+  }
+
+  .reservas-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* ========================================================= */
+/*            FORMULÁRIO DE NOVA RESERVA (ITEM)             */
+/* ========================================================= */
+
+.reservas-form {
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.reservas-form-title {
+  margin: 12px 0 10px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.reservas-form-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.reservas-form-field {
+  text-align: left;
+}
+
+.reservas-form-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.reservas-form-field input[type="date"] {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid #444;
+  font-size: 14px;
+}
+
+.reservas-form-actions {
+  margin-top: 4px;
+}
+
+/* ========================================================= */
+/*            EDIÇÃO DE CONTA - ESTILO SIMILAR AO HISTÓRICO  */
+/* ========================================================= */
+
+.editar-card {
+  background: var(--cor-card);
+  border-radius: 32px;
+  padding: 28px 36px;
+  max-width: 760px;
+  width: 100%;
+  box-shadow: 0 0 0 2px #000;
+  margin: 18px auto;
+}
+
+.editar-card .reservas-title {
+  margin-bottom: 6px;
+}
+
+.editar-card .reservas-subtitle {
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+  color: var(--cor-texto, #ddd);
+}
+
+.editar-form .form-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 12px;
+}
+
+.editar-form label {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.editar-form input[type="text"],
+.editar-form input[type="email"],
+.editar-form input[type="tel"],
+.editar-form input[type="number"] {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  background: transparent;
+  color: inherit;
+}
+
+.readonly-field {
+  margin-bottom: 12px;
+}
+
+.readonly-field label {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.readonly-value {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.04);
+}
+
+@media (max-width: 900px) {
+  .editar-card {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+}
+
+.reservas-voltar-wrapper {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Ajuste leve para mobile */
+@media (max-width: 900px) {
+  .reservas-form-row {
+    gap: 16px;
+  }
+}
+
+/* ========================================================= */
+/*                      PÁGINA HOME                         */
+/* ========================================================= */
+
+.home-wrapper {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.home-wrapper p {
+  margin-bottom: 10px;
+}
+
+.home-welcome {
+  margin-top: 8px;
+  margin-bottom: 18px;
+}
+
+/* lista centralizada visualmente, mas texto alinhado à esquerda */
+.home-list {
+  list-style-position: inside;
+  padding: 0;
+  margin: 8px 0 16px 0;
+  text-align: left;
+  display: inline-block; /* deixa a lista “no centro” do bloco */
+}
+
+/* ========================================================= */
+/*                PÁGINA ESTATÍSTICAS DE RESERVAS            */
+/* ========================================================= */
+
+.stats-container {
+  padding: 24px 0;
+}
+
+/* Filtro */
+.stats-filter {
+  margin-bottom: 28px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;          /* para quebrar em telas menores */
+}
+
+.stats-filter label {
+  font-weight: 600;
+  margin: 0;
+}
+
+.stats-filter select {
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  min-width: 220px;
+}
+
+.stats-filter select:focus {
+  outline: none;
+  border-color: #b22222;
+}
+
+.stats-clear-filter {
+  padding: 10px 20px;
+  background: #999;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.stats-clear-filter:hover {
+  background: #777;
+}
+
+/* Card de info rápida */
+.stats-info-row {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.stats-info-card {
+  flex: 1;
+  min-width: 200px;
+  padding: 20px;
+  background: linear-gradient(135deg, #b22222 0%, #8b0000 100%);
+  color: #fff;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stats-info-card .number {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stats-info-card .label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Cards dos gráficos */
+.stats-graph-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow-x: auto;      /* se ainda exagerar na largura, cria scroll interno */
+}
+
+/* Força o gráfico do Plotly a respeitar a largura do card */
+.stats-graph-card .plotly-graph-div {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Tabela */
+.stats-table-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.stats-table-title {
+  margin: 0 0 16px 0;
+}
+
+.stats-table-wrapper {
+  overflow-x: auto;
+}
+
+.stats-table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stats-table-wrapper thead {
+  background: #f5f5f5;
+}
+
+.stats-table-wrapper th {
+  padding: 14px;
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 2px solid #ddd;
+}
+
+.stats-table-wrapper td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.stats-table-wrapper tr:hover {
+  background: #fafafa;
+}
+
+/* Responsivo extra para telas menores */
+@media (max-width: 900px) {
+  .stats-filter {
+    align-items: flex-start;
+  }
+
+  .stats-filter label {
+    width: 100%;
+  }
+
+  .stats-filter select {
+    width: 100%;
+  }
+}
+
+/* ========================================================= */
+/*                   PÁGINA ESTATÍSTICAS                    */
+/* ========================================================= */
+
+.stats-container {
+  padding: 24px 0;
+}
+
+/* Filtro por item */
+.filter-section {
+  margin-bottom: 28px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-section label {
+  font-weight: 600;
+  margin: 0;
+}
+
+.filter-section select {
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.filter-section select:focus {
+  outline: none;
+  border-color: #b22222;
+}
+
+.filter-section button {
+  padding: 10px 20px;
+  background: #b22222;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.filter-section button:hover {
+  background: #8b0000;
+}
+
+/* Botão "Limpar filtro" */
+.btn-limpar-filtro {
+  padding: 10px 20px;
+  background: #999;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.btn-limpar-filtro:hover {
+  background: #777;
+}
+
+/* Cards de info rápida */
+.stat-info {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 200px;
+  padding: 20px;
+  background: linear-gradient(135deg, #b22222 0%, #8b0000 100%);
+  color: white;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-card .number {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stat-card .label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Contêiner dos gráficos */
+.grafico-container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow-x: auto;        /* se o gráfico ficar muito largo, scroll horizontal */
+}
+
+.grafico-container > div {
+  width: 100% !important;
+  height: 100%;
+}
+
+/* Tabela top usuários */
+.tabela-container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+.tabela-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela-container thead {
+  background: #f5f5f5;
+}
+
+.tabela-container th {
+  padding: 14px;
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 2px solid #ddd;
+}
+
+.tabela-container td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.tabela-container tr:hover {
+  background: #fafafa;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 900px) {
+  .filter-section {
+    align-items: flex-start;
+  }
+
+  .stat-info {
+    gap: 16px;
+  }
+}
+
+
+

@@ -1,0 +1,53 @@
+{% extends "core/base.html" %}
+
+{% block title %}Confirmar retirada{% endblock %}
+
+{% block content %}
+<div class="reservas-wrapper">
+    <div class="reservas-card">
+
+        <h1 class="reservas-title">Confirmar retirada</h1>
+        <div class="reservas-subtitle">
+            Confirme a retirada do item para o usuário abaixo.
+        </div>
+
+        <!-- Detalhes da reserva, sem mostrar o número da reserva -->
+        <div style="margin-bottom: 20px;">
+            <p>
+                <strong>Usuário:</strong>
+                {{ reserva.usuario.nome_completo|default:reserva.usuario.username }} ({{ reserva.usuario.nusp }})
+            </p>
+            <p>
+                <strong>Item:</strong>
+                {{ reserva.item.nome }} ({{ reserva.item.codigo_tipo }})
+            </p>
+            <p>
+                <strong>Período:</strong>
+                {{ reserva.data_retirada|date:"d/m/Y" }} → {{ reserva.data_devolucao|date:"d/m/Y" }}
+            </p>
+        </div>
+
+        <hr style="margin: 20px 0;">
+
+        <form method="post">
+            {% csrf_token %}
+            <h3 style="margin-top: 0; margin-bottom: 10px;">
+                Selecione o exemplar a ser entregue:
+            </h3>
+
+            {{ form.as_p }}
+
+            <!-- Botão vermelho, usando as classes globais -->
+            <button type="submit" class="btn btn-primary" style="margin-top: 12px;">
+                Confirmar retirada
+            </button>
+        </form>
+
+        <p style="margin-top: 16px;">
+            <a href="{% url 'core:reservas_pendentes' %}">← Voltar</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}
+

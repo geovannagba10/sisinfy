@@ -1,0 +1,1 @@
+Patch notes: Ensured middle bar opacity 0 on open for both hamburger elements; used transform translations for pseudo-elements; synchronized durations to --sidebar-transition-duration; added will-change hints to improve smoothness.

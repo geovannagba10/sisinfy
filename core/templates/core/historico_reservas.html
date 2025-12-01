@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+
+{% block title %}Minhas reservas{% endblock %}
+
+{% block content %}
+<div class="reservas-wrapper">
+    <div class="reservas-card">
+        <h1 class="reservas-title">Minhas reservas</h1>
+        <div class="reservas-subtitle">
+            Aqui você pode conferir suas reservas finalizadas e em andamento.
+        </div>
+
+        <div class="reservas-table-wrapper">
+            <table class="reservas-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Item</th>
+                        <th>Data reserva</th>
+                        <th>Retirada</th>
+                        <th>Devolução</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas %}
+                        <tr>
+                            <td>{{ reserva.id }}</td>
+                            <td>{{ reserva.item }}</td>
+                            <td>{{ reserva.data_reserva|date:"d/m/Y H:i" }}</td>
+                            <td>{{ reserva.data_retirada|date:"d/m/Y" }}</td>
+                            <td>{{ reserva.data_devolucao|date:"d/m/Y" }}</td>
+                            <td>
+                                {{ reserva.get_status_display }}
+                                {% if reserva.status == 'Pendente' %}
+                                    <form method="post" action="{% url 'core:cancelar_reserva_usuario' reserva.id %}" style="display:inline;margin-left:10px;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn" style="padding:4px 8px;font-size:12px;">Cancelar</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

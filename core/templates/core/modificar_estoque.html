@@ -1,0 +1,95 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Modificar Estoque{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Modificar Estoque</h1>
+<div class="page-title-underline"></div>
+
+<!-- SEÇÃO: NOVO TIPO DE ITEM -->
+<div style="margin-bottom: 40px;">
+  <div class="reservas-wrapper">
+    <div class="reservas-card">
+      <h2 class="reservas-title">Adicionar Novo Tipo de Item</h2>
+      
+      <form method="post" enctype="multipart/form-data" class="editar-form" style="max-width: 600px; margin: 0 auto;">
+        {% csrf_token %}
+        
+        {{ form.non_field_errors }}
+        
+        <div class="form-row">
+          {{ form.nome.label_tag }}
+          {{ form.nome }}
+          {{ form.nome.errors }}
+        </div>
+        
+        <div class="form-row">
+          {{ form.codigo_tipo.label_tag }}
+          {{ form.codigo_tipo }}
+          {{ form.codigo_tipo.errors }}
+        </div>
+        
+        <div class="form-row">
+          {{ form.descricao.label_tag }}
+          {{ form.descricao }}
+          {{ form.descricao.errors }}
+        </div>
+        
+        <div class="form-row">
+          {{ form.imagem.label_tag }}
+          {{ form.imagem }}
+          {{ form.imagem.errors }}
+        </div>
+        
+        <div style="margin-top: 16px;">
+          <button type="submit" class="btn btn-primary">Criar novo tipo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SEÇÃO: ITENS EXISTENTES -->
+<h2 style="text-align: center; margin-bottom: 24px;">Itens em Estoque</h2>
+
+<div class="item-grid">
+    {% for item in itens %}
+        <div class="item-card">
+            <!-- IMAGEM DO ITEM -->
+            <div class="item-icon">
+                {% if item.imagem %}
+                    <img src="{{ item.imagem.url }}" 
+                         alt="{{ item.nome }}"
+                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                {% else %}
+                    <div style="width: 80px; height: 80px; background: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #666; font-size: 12px;">Sem imagem</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="item-nome">
+                {{ item.nome }}
+            </div>
+
+            <div class="item-info">
+                Código: <strong>{{ item.codigo_tipo }}</strong><br>
+                Total: {{ item.total_exemplares }}<br>
+                Disponíveis: {{ item.disponiveis }}<br>
+                Reservados: {{ item.reservados }}<br>
+                Em manutenção: {{ item.em_manutencao }}
+            </div>
+
+            <a href="{% url 'core:detalhe_item_estoque' item.id %}">
+                <button class="btn btn-primary">Gerenciar exemplares</button>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+
+{% if not itens %}
+  <p style="text-align: center; color: #999; margin-top: 40px;">Nenhum item cadastrado ainda.</p>
+{% endif %}
+
+{% endblock %}

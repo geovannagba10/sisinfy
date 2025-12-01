@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+
+{% block title %}Registrar Retirada Manual{% endblock %}
+
+{% block content %}
+
+<div class="reservas-wrapper">
+  <div class="reservas-card editar-card">
+    <h2 class="reservas-title">Registrar Retirada Manual</h2>
+    <div class="reservas-subtitle">Registre a retirada de um item para um aluno manualmente</div>
+
+    <form method="post" class="editar-form">
+      {% csrf_token %}
+
+      {{ form.non_field_errors }}
+
+      <div class="form-row">
+        {{ form.usuario_identificador.label_tag }}
+        {{ form.usuario_identificador }}
+        {{ form.usuario_identificador.errors }}
+      </div>
+
+      <div class="form-row">
+        {{ form.item.label_tag }}
+        {{ form.item }}
+        {{ form.item.errors }}
+      </div>
+
+      <div class="form-row">
+        {{ form.data_retirada.label_tag }}
+        {{ form.data_retirada }}
+        {{ form.data_retirada.errors }}
+      </div>
+
+      <div class="form-row">
+        {{ form.data_devolucao.label_tag }}
+        {{ form.data_devolucao }}
+        {{ form.data_devolucao.errors }}
+      </div>
+
+      <div style="margin-top:16px;">
+        <button type="submit" class="btn btn-primary">Registrar retirada</button>
+        <a href="{% url 'core:reservas_pendentes' %}" class="btn" style="margin-left:8px;">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "core/base.html" %}
+
+{% block title %}TEM NO CAM{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">TEM NO CAM</h1>
+<div class="page-title-underline"></div>
+
+<div class="home-wrapper">
+    <p class="home-welcome">
+        <strong>Bem-vindo(a), {{ request.user.get_full_name|default:request.user.username }}!</strong>
+    </p>
+
+    <p>
+        Este sistema foi desenvolvido para organizar o empréstimo de itens do CAM, como
+        calculadoras, jalecos, óculos de proteção e outros materiais de laboratório.
+    </p>
+
+    <p>Aqui você pode:</p>
+
+    <ul class="home-list">
+        <li>consultar os itens disponíveis para empréstimo;</li>
+        <li>fazer reservas com antecedência, dentro das regras do CAM;</li>
+        <li>acompanhar o histórico de reservas que você já realizou.</li>
+    </ul>
+
+    <p>
+        Quaisquer dúvidas, mande um e-mail para:
+        patrimoniocampoli@gmail.com.
+    </p>
+
+    <p>
+        Use o menu à esquerda para navegar pelas funcionalidades do sistema.
+    </p>
+</div>
+
+{% endblock %}
+
+
+

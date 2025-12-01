@@ -1,0 +1,127 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ item.nome }} - Detalhes{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 20px;">
+  <a href="{% url 'core:modificar_estoque' %}" style="text-decoration: none;">
+    <button class="btn" style="background: #999; color: #fff;">← Voltar ao estoque</button>
+  </a>
+</div>
+
+<div class="reservas-wrapper">
+  <div class="reservas-card">
+    <h2 class="reservas-title">{{ item.nome }}</h2>
+    <div class="reservas-subtitle">Código: <strong>{{ item.codigo_tipo }}</strong></div>
+    
+    {% if item.descricao %}
+      <div style="margin-bottom: 20px; padding: 12px; background: rgba(0,0,0,0.04); border-radius: 10px; font-size: 0.95rem;">
+        <strong>Descrição:</strong> {{ item.descricao }}
+      </div>
+    {% endif %}
+
+    {% if item.imagem %}
+      <div style="margin-bottom: 20px; text-align: center;">
+        <img src="{{ item.imagem.url }}" 
+             alt="{{ item.nome }}"
+             style="max-width: 200px; height: auto; border-radius: 10px; border: 1px solid #ddd;">
+      </div>
+    {% endif %}
+
+    <div style="margin-bottom: 24px; padding: 16px; background: rgba(180, 34, 34, 0.1); border-radius: 10px;">
+      <h3 style="margin-top: 0; color: #b22222;">Resumo do estoque</h3>
+      <p style="margin: 4px 0;"><strong>Total de exemplares:</strong> {{ exemplares.count }}</p>
+      <p style="margin: 4px 0;"><strong>Disponíveis:</strong> {{ exemplares|dictsort:"situacao"|length }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- EXEMPLARES EXISTENTES -->
+<h3 style="text-align: center; margin: 32px 0 20px 0;">Exemplares</h3>
+
+{% if exemplares %}
+  <div class="reservas-wrapper">
+    <div class="reservas-card">
+      <div class="reservas-table-wrapper">
+        <table class="reservas-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Situação</th>
+              <th>Condição</th>
+              <th>Observações</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for exemplar in exemplares %}
+              <tr>
+                <td><strong>{{ exemplar.codigo_exemplar }}</strong></td>
+                <td>{{ exemplar.get_situacao_display }}</td>
+                <td>{{ exemplar.get_condicao_display }}</td>
+                <td>{{ exemplar.observacoes|truncatewords:10 }}</td>
+                <td>
+                  <form method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="exemplar_id" value="{{ exemplar.id }}">
+                    <button type="submit" name="deletar_exemplar" class="btn" style="background: #d32f2f; color: #fff; padding: 6px 12px; font-size: 0.9rem; border: none; cursor: pointer; border-radius: 6px;">Deletar</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div style="text-align: center; color: #999; padding: 40px 20px;">
+    <p>Nenhum exemplar cadastrado para este item.</p>
+  </div>
+{% endif %}
+
+<!-- ADICIONAR NOVO EXEMPLAR -->
+<h3 style="text-align: center; margin: 32px 0 20px 0;">Adicionar Novo Exemplar</h3>
+
+<div class="reservas-wrapper">
+  <div class="reservas-card editar-card">
+    <form method="post" class="editar-form">
+      {% csrf_token %}
+      
+      {{ form.non_field_errors }}
+      
+      <div class="form-row">
+        {{ form.codigo_exemplar.label_tag }}
+        {{ form.codigo_exemplar }}
+        {{ form.codigo_exemplar.errors }}
+      </div>
+      
+      <div class="form-row">
+        {{ form.situacao.label_tag }}
+        {{ form.situacao }}
+        {{ form.situacao.errors }}
+      </div>
+      
+      <div class="form-row">
+        {{ form.condicao.label_tag }}
+        {{ form.condicao }}
+        {{ form.condicao.errors }}
+      </div>
+      
+      <div class="form-row">
+        {{ form.observacoes.label_tag }}
+        {{ form.observacoes }}
+        {{ form.observacoes.errors }}
+      </div>
+      
+      <div style="margin-top: 16px;">
+        <button type="submit" name="criar_exemplar" class="btn btn-primary">Criar exemplar</button>
+        <a href="{% url 'core:modificar_estoque' %}" class="btn" style="margin-left: 8px;">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

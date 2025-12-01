@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+
+{% block title %}Confirme seu e-mail{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Confirme seu e-mail</h1>
+    <p>
+        Sua conta foi criada, mas ainda não está ativa.
+        Enviamos um e-mail para <strong>{{ email }}</strong> com um link de ativação.
+    </p>
+    <p>
+        Verifique sua caixa de entrada (e a pasta de spam, se necessário) e clique no link para ativar sua conta.
+    </p>
+</div>
+{% endblock %}

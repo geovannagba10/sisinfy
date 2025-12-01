@@ -1,0 +1,316 @@
+{% extends "core/base.html" %}
+
+{% block title %}Histórico Completo de Reservas{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">Histórico Completo de Reservas</h1>
+<div class="page-title-underline"></div>
+
+<div class="historico-wrapper">
+  <!-- FILTROS -->
+  <form method="get" class="filter-section">
+    <div class="filter-row">
+      <div class="filter-field">
+        <label for="usuario_filtro">NUSP do Usuário:</label>
+        <input type="text" id="usuario_filtro" name="usuario" value="{{ usuario_filtro }}" placeholder="Digite o NUSP">
+      </div>
+
+      <div class="filter-field">
+        <label for="item_filtro">Código do Item:</label>
+        <input type="text" id="item_filtro" name="item" value="{{ item_filtro }}" placeholder="Digite o código">
+      </div>
+
+      <div class="filter-field">
+        <label for="status_filtro">Status:</label>
+        <select id="status_filtro" name="status">
+          <option value="">Todos</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status_filtro == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a href="{% url 'core:historico_reservas_completo' %}" class="btn" style="background:#999;color:#fff;">
+          Limpar
+        </a>
+      </div>
+    </div>
+  </form>
+
+  <!-- INFO -->
+  <div class="info-bar">
+    <p>Total de reservas encontradas: <strong>{{ total_reservas }}</strong></p>
+  </div>
+
+  <!-- TABELA -->
+  <div class="tabela-container">
+    <table class="historico-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>NUSP</th>
+          <th>Item</th>
+          <th>Status</th>
+          <th>Data Reserva</th>
+          <th>Retirada</th>
+          <th>Devolução</th>
+          <th>Exemplar</th>
+          <th>Confirmou Retirada</th>
+          <th>Data Retirada</th>
+          <th>Confirmou Devolução</th>
+          <th>Data Devolução</th>
+          <th>Cancelou</th>
+          <th>Data Cancelamento</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reserva in reservas %}
+        <tr class="status-{{ reserva.get_status_display|lower }}">
+          <td>{{ reserva.id }}</td>
+          <td>{{ reserva.usuario.nusp }}</td>
+          <td>
+            <strong>{{ reserva.item.codigo_tipo }}</strong><br>
+            <small>{{ reserva.item.nome }}</small>
+          </td>
+          <td>
+            <span class="status-badge status-{{ reserva.status|lower }}">
+              {{ reserva.get_status_display }}
+            </span>
+          </td>
+          <td>{{ reserva.data_reserva|date:"d/m/Y H:i" }}</td>
+          <td>{{ reserva.data_retirada|date:"d/m/Y" }}</td>
+          <td>{{ reserva.data_devolucao|date:"d/m/Y" }}</td>
+          <td>
+            {% if reserva.exemplar %}
+              <strong>{{ reserva.exemplar.codigo_exemplar }}</strong><br>
+              <small>{{ reserva.exemplar.get_condicao_display }}</small>
+            {% else %}
+              <em style="color:#999;">-</em>
+            {% endif %}
+          </td>
+          <td>
+            {% if reserva.usuario_confirmou_retirada %}
+              {{ reserva.usuario_confirmou_retirada.nusp }}<br>
+              <small>{{ reserva.usuario_confirmou_retirada.username }}</small>
+            {% else %}
+              <em style="color:#999;">-</em>
+            {% endif %}
+          </td>
+          <td>
+            {% if reserva.data_confirmou_retirada %}
+              {{ reserva.data_confirmou_retirada|date:"d/m/Y H:i" }}
+            {% else %}
+              <em style="color:#999;">-</em>
+            {% endif %}
+          </td>
+          <td>
+            {% if reserva.usuario_confirmou_devolucao %}
+              {{ reserva.usuario_confirmou_devolucao.nusp }}<br>
+              <small>{{ reserva.usuario_confirmou_devolucao.username }}</small>
+            {% else %}
+              <em style="color:#999;">-</em>
+            {% endif %}
+          </td>
+          <td>
+            {% if reserva.data_confirmou_devolucao %}
+              {{ reserva.data_confirmou_devolucao|date:"d/m/Y H:i" }}
+            {% else %}
+              <em style="color:#999;">-</em>
+            {% endif %}
+          </td>
+          <td>
+            {% if reserva.usuario_cancelou %}
+              {{ reserva.usuario_cancelou.nusp }}<br>
+              <small>{{ reserva.usuario_cancelou.username }}</small>
+            {% else %}
+              <em style="color:#999;">-</em>
+            {% endif %}
+          </td>
+          <td>
+            {% if reserva.cancelada_em %}
+              {{ reserva.cancelada_em|date:"d/m/Y H:i" }}
+            {% else %}
+              <em style="color:#999;">-</em>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="12" style="text-align:center;color:#999;">
+            Nenhuma reserva encontrada com os filtros aplicados.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINAÇÃO -->
+  {% if page_obj.has_other_pages %}
+  <div class="paginacao">
+    {% if page_obj.has_previous %}
+      <a href="?page=1{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if usuario_filtro %}&usuario={{ usuario_filtro }}{% endif %}{% if item_filtro %}&item={{ item_filtro }}{% endif %}" class="btn btn-sm">Primeira</a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if usuario_filtro %}&usuario={{ usuario_filtro }}{% endif %}{% if item_filtro %}&item={{ item_filtro }}{% endif %}" class="btn btn-sm">Anterior</a>
+    {% endif %}
+
+    <span class="page-info">
+      Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if usuario_filtro %}&usuario={{ usuario_filtro }}{% endif %}{% if item_filtro %}&item={{ item_filtro }}{% endif %}" class="btn btn-sm">Próxima</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if status_filtro %}&status={{ status_filtro }}{% endif %}{% if usuario_filtro %}&usuario={{ usuario_filtro }}{% endif %}{% if item_filtro %}&item={{ item_filtro }}{% endif %}" class="btn btn-sm">Última</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .historico-wrapper {
+    padding: 0;
+  }
+
+  .filter-section {
+    background: #f9f9f9;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+
+  .filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    align-items: flex-end;
+  }
+
+  .filter-field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .filter-field label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  .filter-field input,
+  .filter-field select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .info-bar {
+    background: #f0f0f0;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--cor-botao);
+    border-radius: 4px;
+  }
+
+  .info-bar p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .historico-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .historico-table thead {
+    background: #f5f5f5;
+  }
+
+  .historico-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .historico-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .historico-table tbody tr:hover {
+    background: #f9f9f9;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .status-badge.status-pendente {
+    background: #ff9800;
+  }
+
+  .status-badge.status-confirmado {
+    background: #4caf50;
+  }
+
+  .status-badge.status-cancelada {
+    background: #f44336;
+  }
+
+  .status-badge.status-concluida {
+    background: #2196f3;
+  }
+
+  .paginacao {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .btn.btn-sm {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .page-info {
+    padding: 8px 16px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .historico-table {
+      font-size: 11px;
+    }
+
+    .historico-table th,
+    .historico-table td {
+      padding: 8px;
+    }
+
+    .filter-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+{% endblock %}

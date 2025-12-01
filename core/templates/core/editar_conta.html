@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+
+{% block title %}Editar Conta{% endblock %}
+
+{% block content %}
+
+
+<div class="reservas-wrapper">
+  <div class="reservas-card editar-card">
+    <h2 class="reservas-title">Editar Conta</h2>
+    <div class="reservas-subtitle">Atualize seus dados (NUSP e e-mail são somente leitura)</div>
+
+    <form method="post" class="editar-form">
+      {% csrf_token %}
+
+      <div class="readonly-field">
+        <label>NUSP</label>
+        <div class="readonly-value">{{ nusp }}</div>
+      </div>
+
+      <div class="readonly-field">
+        <label>E-mail</label>
+        <div class="readonly-value">{{ email }}</div>
+      </div>
+
+      {{ form.non_field_errors }}
+
+      <div class="form-row">
+        {{ form.first_name.label_tag }}
+        {{ form.first_name }}
+        {{ form.first_name.errors }}
+      </div>
+
+      <div class="form-row">
+        {{ form.last_name.label_tag }}
+        {{ form.last_name }}
+        {{ form.last_name.errors }}
+      </div>
+
+      <div class="form-row">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+
+      <div class="form-row">
+        {{ form.telefone.label_tag }}
+        {{ form.telefone }}
+        {{ form.telefone.errors }}
+      </div>
+
+      <div style="margin-top:16px;">
+        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+        <a href="/" class="btn" style="margin-left:8px;">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

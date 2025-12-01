@@ -1,0 +1,57 @@
+{% extends "core/base.html" %}
+
+{% block title %}Reservar {{ item.nome }}{% endblock %}
+
+{% block content %}
+<div class="reservas-wrapper">
+  <div class="reservas-card">
+
+    <h1 class="reservas-title">
+      Reservar: {{ item.nome }} ({{ item.codigo_tipo }})
+    </h1>
+
+    <p class="reservas-subtitle">
+      A reserva é disponível apenas para os próximos 15 dias. Limite de um por
+      usuário. Se a retirada não for feita em um período de 24h a partir da
+      data prevista, a reserva será automaticamente cancelada.
+    </p>
+
+    <form method="post" class="reservas-form">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      {# item já é passado pela URL, então não precisa de hidden field #}
+
+      <h3 class="reservas-form-title">Escolha o período da reserva:</h3>
+
+      <div class="reservas-form-row">
+        <div class="reservas-form-field">
+          {{ form.data_retirada.label_tag }}
+          {{ form.data_retirada }}
+          {{ form.data_retirada.errors }}
+        </div>
+
+        <div class="reservas-form-field">
+          {{ form.data_devolucao.label_tag }}
+          {{ form.data_devolucao }}
+          {{ form.data_devolucao.errors }}
+        </div>
+      </div>
+
+      <div class="reservas-form-actions">
+        <button type="submit" class="btn btn-primary">
+          Confirmar reserva
+        </button>
+      </div>
+    </form>
+
+    <div class="reservas-voltar-wrapper">
+      <a href="{% url 'core:lista_itens' %}" class="voltar-link">
+        ← Voltar para lista de itens
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+

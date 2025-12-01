@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+
+{% block title %}Confirmar devolução{% endblock %}
+
+{% block content %}
+<div class="reservas-wrapper">
+    <div class="reservas-card">
+
+        <h1 class="reservas-title">Confirmar devolução</h1>
+        <div class="reservas-subtitle">
+            Registre a devolução do item para o usuário abaixo.
+        </div>
+
+        <!-- Detalhes da reserva (sem mostrar nº da reserva) -->
+        <div style="margin-bottom: 20px;">
+            <p>
+                <strong>Usuário:</strong>
+                {{ reserva.usuario.nome_completo|default:reserva.usuario.username }} ({{ reserva.usuario.nusp }})
+            </p>
+
+            {% if reserva.exemplar %}
+            <p>
+                <strong>Exemplar:</strong>
+                {{ reserva.exemplar.codigo_exemplar }}
+                ({{ reserva.exemplar.item.nome }})
+            </p>
+            {% endif %}
+
+            <p>
+                <strong>Período:</strong>
+                {{ reserva.data_retirada|date:"d/m/Y" }}
+                → {{ reserva.data_devolucao|date:"d/m/Y" }}
+            </p>
+        </div>
+
+        <hr style="margin: 20px 0;">
+
+        <form method="post">
+            {% csrf_token %}
+            <h3 style="margin-top: 0; margin-bottom: 10px;">
+                Condição do exemplar após a devolução:
+            </h3>
+
+            {{ form.as_p }}
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 12px;">
+                Confirmar devolução
+            </button>
+        </form>
+
+        <p style="margin-top: 16px;">
+            <a href="{% url 'core:reservas_ativas' %}">← Voltar</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}
+

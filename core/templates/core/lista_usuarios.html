@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+
+{% block title %}Gerenciar usuários{% endblock %}
+
+{% block content %}
+<div class="reservas-wrapper">
+    <div class="reservas-card">
+
+        <h1 class="reservas-title">Gerenciamento de usuários</h1>
+        <div class="reservas-subtitle">Apenas diretoria pode alterar níveis de acesso.</div>
+
+        <form method="get" class="search-form" style="margin-top:12px; margin-bottom:18px;">
+            <input type="search" name="q" placeholder="Pesquisar por NUSP, usuário, nome ou email" value="{{ q|default:'' }}" style="padding:8px; width:60%; max-width:320px;">
+            <button type="submit" class="btn">Buscar</button>
+            {% if q %}
+                <a href="{% url 'core:lista_usuarios' %}" class="btn" style="margin-left:8px;">Limpar</a>
+            {% endif %}
+        </form>
+
+        <div class="reservas-table-wrapper">
+            <table class="reservas-table">
+                <thead>
+                    <tr>
+                        <th>NUSP</th>
+                        <th>Username</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Tipo de acesso</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for u in usuarios %}
+                    <tr>
+                        <td>{{ u.nusp }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.get_full_name }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>{{ u.tipo_acesso }}</td>
+                        <td>
+                            <a href="{% url 'core:alterar_tipo_acesso_usuario' u.id %}">
+                                Alterar nível de acesso
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align:center; margin-top:25px;">
+            <a href="{% url 'core:home' %}" class="voltar-link">← Voltar para a home</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,41 @@
+{% extends "core/base.html" %}
+
+{% block title %}Alterar nível de acesso{% endblock %}
+
+{% block content %}
+<div class="reservas-wrapper">
+  <div class="reservas-card">
+
+    <h1 class="reservas-title">Alterar nível de acesso</h1>
+
+    <div class="reservas-info">
+      <p><strong>Usuário:</strong> {{ usuario_alvo.get_full_name }} ({{ usuario_alvo.nusp }})</p>
+      <p><strong>Tipo atual:</strong> {{ usuario_alvo.tipo_acesso }}</p>
+    </div>
+
+    <form method="post" class="reservas-form">
+      {% csrf_token %}
+      <div class="form-container">
+        {{ form.as_p }}
+      </div>
+
+      <!-- BOTÃO CORRETO -->
+      <button type="submit" class="btn btn-primary">
+        Salvar
+      </button>
+    </form>
+
+    <div style="text-align:center; margin-top:25px;">
+      <a href="{% url 'core:lista_usuarios' %}" class="voltar-link">
+        ← Voltar para lista de usuários
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+
+
+
+

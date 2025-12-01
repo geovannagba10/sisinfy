@@ -1,0 +1,68 @@
+{% extends "core/base.html" %}
+
+{% block title %}Reservas ativas{% endblock %}
+
+{% block content %}
+<div class="reservas-wrapper">
+    <div class="reservas-card">
+
+        <h1 class="reservas-title">Reservas ativas</h1>
+        <div class="reservas-subtitle">
+            Itens retirados e ainda não devolvidos.
+        </div>
+
+        <form method="get" class="search-form" style="margin-top:12px; margin-bottom:18px;">
+            <input type="search" name="q" placeholder="Pesquisar por NUSP, usuário, nome, email, item ou ID" value="{{ q|default:'' }}" style="padding:8px; width:60%; max-width:360px;">
+            <button type="submit" class="btn">Buscar</button>
+            {% if q %}
+                <a href="{% url 'core:reservas_ativas' %}" class="btn" style="margin-left:8px;">Limpar</a>
+            {% endif %}
+        </form>
+
+        {% if reservas %}
+        <div class="reservas-table-wrapper">
+            <table class="reservas-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>NUSP</th>
+                        <th>Item</th>
+                        <th>Retirada</th>
+                        <th>Devolução prevista</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for r in reservas %}
+                    <tr>
+                        <td>{{ r.id }}</td>
+                        <td>{{ r.usuario.get_full_name|default:r.usuario.username }}</td>
+                        <td>{{ r.usuario.nusp }}</td>
+                        <td>{{ r.item.nome }} ({{ r.item.codigo_tipo }})</td>
+                        <td>{{ r.data_retirada|date:"d/m/Y" }}</td>
+                        <td>{{ r.data_devolucao|date:"d/m/Y" }}</td>
+                        <td>{{ r.status }}</td>
+                        <td>
+                            <a href="{% url 'core:confirmar_devolucao' r.id %}">
+                                Confirmar devolução
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+            <p style="text-align:center; margin-top:20px;">
+                Não há reservas ativas no momento.
+            </p>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+

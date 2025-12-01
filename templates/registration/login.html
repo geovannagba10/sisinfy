@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Faça o seu login</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary">Entrar</button>
+    </form>
+
+    <p style="margin-top: 12px; text-align: center;">
+        Ainda não tem conta?
+        <a href="{% url 'signup' %}">Cadastrar-se</a>
+    </p>
+</div>
+{% endblock %}
+

@@ -1,0 +1,279 @@
+{% extends "core/base.html" %}
+
+{% block title %}Estatísticas de Reservas{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">Estatísticas de Reservas</h1>
+<div class="page-title-underline"></div>
+
+<div id="estatisticas-app" class="stats-container">
+  <!-- FILTRO -->
+  <form class="filter-section" @submit.prevent="carregarDados">
+    <label for="item_id">Filtrar por tipo de item:</label>
+    <select id="item_id" v-model="filtroItem">
+      <option value="">Todos os itens</option>
+      {% verbatim %}
+      <option v-for="item in itens" :key="item.id" :value="item.id">
+        {{ item.codigo_tipo }} - {{ item.nome }}
+      </option>
+      {% endverbatim %}
+    </select>
+
+    <button type="submit" class="btn btn-primary">
+      Filtrar
+    </button>
+
+    <button
+      type="button"
+      v-if="filtroItem"
+      @click="limparFiltro"
+      class="btn"
+      style="background:#999;color:#fff;margin-left:8px;"
+    >
+      Limpar filtro
+    </button>
+  </form>
+
+  <!-- CARD TOTAL -->
+  <div class="stat-info">
+    <div class="stat-card">
+      <div class="number">{{ total_reservas }}</div>
+      <div class="label">Total de Reservas</div>
+    </div>
+  </div>
+
+  <!-- GRÁFICO: Reservas por dia -->
+  <div class="grafico-container">
+    <h2 style="margin-top:0;margin-bottom:8px;">Reservas por Dia</h2>
+    <div style="position:relative; height:360px;">
+      <canvas id="chartPorDia"></canvas>
+    </div>
+  </div>
+
+  <!-- GRÁFICO: Top itens -->
+  <div class="grafico-container">
+    <h2 style="margin-top:0;margin-bottom:8px;">Top 10 Itens Mais Reservados</h2>
+    <div style="position:relative; height:360px;">
+      <canvas id="chartTopItens"></canvas>
+    </div>
+  </div>
+
+  <!-- GRÁFICO: Reservas por mês -->
+  <div class="grafico-container">
+    <h2 style="margin-top:0;margin-bottom:8px;">Reservas por Mês</h2>
+    <div style="position:relative; height:360px;">
+      <canvas id="chartPorMes"></canvas>
+    </div>
+  </div>
+
+  <!-- TABELA: Top usuários -->
+  <div class="tabela-container">
+    <h2 style="margin-top:0;margin-bottom:16px;">Usuários que Mais Reservaram</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>NUSP</th>
+          <th>Nome</th>
+          <th>Total de Reservas</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% verbatim %}
+        <tr v-for="(u, idx) in top_usuarios" :key="u.nusp">
+          <td>{{ idx + 1 }}</td>
+          <td>{{ u.nusp }}</td>
+          <td>{{ u.nome }}</td>
+          <td><strong>{{ u.total }}</strong></td>
+        </tr>
+        {% endverbatim %}
+        <tr v-if="top_usuarios.length === 0">
+          <td colspan="4" style="text-align:center;color:#999;">
+            Nenhum dado disponível
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Vue 3 e Chart.js via CDN -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const { createApp } = Vue;
+
+  createApp({
+    data() {
+      return {
+        itens: JSON.parse(`{{ itens_json|escapejs }}`),
+        filtroItem: "",
+        total_reservas: 0,
+        reservas_por_dia: [],
+        top_itens: [],
+        reservas_por_mes: [],
+        top_usuarios: [],
+        // instâncias de gráfico
+        chartDia: null,
+        chartTopItens: null,
+        chartMes: null,
+      };
+    },
+
+    mounted() {
+      this.carregarDados();
+    },
+
+    methods: {
+      async carregarDados() {
+        try {
+          const params = new URLSearchParams();
+          if (this.filtroItem) {
+            params.append("item_id", this.filtroItem);
+          }
+
+          const url = "{% url 'core:api_estatisticas' %}?" + params.toString();
+          const resp = await fetch(url, { credentials: 'same-origin' });
+          if (!resp.ok) {
+            console.error('HTTP error ao buscar estatísticas:', resp.status);
+            return;
+          }
+          const ct = resp.headers.get('content-type') || '';
+          if (!ct.includes('application/json')) {
+            // resposta não é JSON (provavelmente redirect para login)
+            const text = await resp.text();
+            console.error('Resposta inesperada (não JSON):', text.slice(0, 500));
+            return;
+          }
+          const data = await resp.json();
+
+          this.total_reservas = data.total_reservas;
+          this.reservas_por_dia = data.reservas_por_dia;
+          this.top_itens = data.top_itens;
+          this.reservas_por_mes = data.reservas_por_mes;
+          this.top_usuarios = data.top_usuarios;
+
+          this.renderCharts();
+        } catch (e) {
+          console.error("Erro ao carregar estatísticas:", e);
+        }
+      },
+
+      limparFiltro() {
+        this.filtroItem = "";
+        this.carregarDados();
+      },
+
+      renderCharts() {
+        this.renderChartDia();
+        this.renderChartTopItens();
+        this.renderChartMes();
+      },
+
+      renderChartDia() {
+        const ctx = document.getElementById("chartPorDia").getContext("2d");
+        if (this.chartDia) this.chartDia.destroy();
+
+        this.chartDia = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: this.reservas_por_dia.map(r => r.dia),
+            datasets: [
+              {
+                label: "Reservas",
+                data: this.reservas_por_dia.map(r => r.total),
+                borderColor: "#b22222",
+                backgroundColor: "rgba(178,34,34,0.16)",
+                borderWidth: 2,
+                tension: 0.2,
+                pointRadius: 4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Quantidade de Reservas" },
+              },
+              x: {
+                title: { display: true, text: "Data" },
+              },
+            },
+          },
+        });
+      },
+
+      renderChartTopItens() {
+        const ctx = document.getElementById("chartTopItens").getContext("2d");
+        if (this.chartTopItens) this.chartTopItens.destroy();
+
+        this.chartTopItens = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: this.top_itens.map(i => i.item),
+            datasets: [
+              {
+                label: "Reservas",
+                data: this.top_itens.map(i => i.total),
+                backgroundColor: "rgba(178,34,34,0.8)",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Quantidade de Reservas" },
+              },
+              x: {
+                title: { display: true, text: "Item" },
+              },
+            },
+          },
+        });
+      },
+
+      renderChartMes() {
+        const ctx = document.getElementById("chartPorMes").getContext("2d");
+        if (this.chartMes) this.chartMes.destroy();
+
+        this.chartMes = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: this.reservas_por_mes.map(m => m.mes),
+            datasets: [
+              {
+                label: "Reservas",
+                data: this.reservas_por_mes.map(m => m.total),
+                backgroundColor: "rgba(139,0,0,0.85)",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Quantidade de Reservas" },
+              },
+              x: {
+                title: { display: true, text: "Mês" },
+              },
+            },
+          },
+        });
+      },
+    },
+  }).mount("#estatisticas-app");
+</script>
+
+{% endblock %}
+

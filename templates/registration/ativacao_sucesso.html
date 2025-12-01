@@ -1,0 +1,15 @@
+{% extends "core/base.html" %}
+
+{% block title %}Conta ativada{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Conta ativada com sucesso!</h1>
+    <p>
+        Olá, {{ user.get_full_name|default:user.username }}! Sua conta foi ativada.
+    </p>
+    <p>
+        Você já está autenticado no sistema. Use o menu à esquerda para navegar.
+    </p>
+</div>
+{% endblock %}
